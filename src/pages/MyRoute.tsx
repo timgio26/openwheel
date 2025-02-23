@@ -2,15 +2,17 @@ import { MdOutlineAirlineSeatReclineNormal } from "react-icons/md";
 import { TbSteeringWheelFilled } from "react-icons/tb";
 import { useForm } from "react-hook-form";
 import { MyMap } from "../components/MyMap";
+import { IoIosArrowBack } from "react-icons/io";
+import { Link } from "react-router";
 // import { useRef } from "react";
 
 type PointData = {
-  strAddress:string,
-  lat:string,
-  lng:string,
-}
+  strAddress: string;
+  lat: string;
+  lng: string;
+};
 
-type MyRouteForm = {
+export type MyRouteForm = {
   startingPoint: PointData;
   destination: PointData;
   role: "driver" | "passenger";
@@ -22,23 +24,34 @@ type MyRouteForm = {
 };
 
 export function MyRoute() {
-  const { register, handleSubmit, setValue, watch,formState: { errors },} = useForm<MyRouteForm>();
+  // const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<MyRouteForm>();
   const watchAllField = watch();
-  console.log(watchAllField.startingPoint?.lat);
-  console.log(errors)
+  console.log(watchAllField);
+  console.log(errors);
 
   function handleClick(value: "driver" | "passenger") {
     setValue("role", value);
     if (value == "passenger") setValue("availSeat", 0);
   }
 
-  function handleMapClick(point:'startingPoint'|'destination',lat:string,lng:string):void{
-    if(point=='destination'){
-      setValue("destination.lat",lat)
-      setValue('destination.lng',lng)
-    }else{
-      setValue("startingPoint.lat",lat)
-      setValue("startingPoint.lng",lng)
+  function handleMapClick(
+    point: "startingPoint" | "destination",
+    lat: string,
+    lng: string
+  ): void {
+    if (point == "destination") {
+      setValue("destination.lat", lat);
+      setValue("destination.lng", lng);
+    } else {
+      setValue("startingPoint.lat", lat);
+      setValue("startingPoint.lng", lng);
     }
   }
 
@@ -58,13 +71,21 @@ export function MyRoute() {
     }
   }
 
+  // function handleBack
+
   function onSubmit(data: MyRouteForm) {
     console.log(data);
   }
 
   return (
     <div>
-      <h1 className="text-2xl text-center font-light mb-2">MyRoute</h1>
+      <div className="flex flex-row justify-center items-center relative">
+        <Link className="absolute left-0" to={'/myroute'}>
+        <IoIosArrowBack  size={30}/>
+        </Link>
+        
+        <h1 className="text-2xl font-light mb-2">Add Route</h1>
+      </div>
       <MyMap
         lat1={watchAllField.startingPoint?.lat}
         lng1={watchAllField.startingPoint?.lng}
@@ -73,7 +94,7 @@ export function MyRoute() {
         onMapClick={handleMapClick}
       />
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-        <div className="flex flex-col my-1">
+        {/* <div className="flex flex-col my-1">
           <label htmlFor="starting" onClick={() => console.log("wtf")}>
             Starting point
           </label>
@@ -95,7 +116,7 @@ export function MyRoute() {
             className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
             {...register("destination.strAddress", { required: true })}
           />
-        </div>
+        </div> */}
 
         <div className="my-1">
           <span>Role</span>
@@ -132,7 +153,7 @@ export function MyRoute() {
 
         <div
           className="flex flex-col my-1"
-          hidden={watchAllField.role == "passenger"}
+          hidden={watchAllField.role != "driver"}
         >
           <label htmlFor="availseat">Available Seat</label>
           <input
@@ -151,7 +172,7 @@ export function MyRoute() {
 
         <div
           className="flex flex-col my-1"
-          hidden={watchAllField.role == "passenger"}
+          hidden={watchAllField.role != "driver"}
         >
           <label htmlFor="fare">Single Fare (USD)</label>
           <input

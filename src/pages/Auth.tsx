@@ -1,7 +1,27 @@
 import { useState } from "react";
+import { signup } from "../utils/api";
+import {toast} from 'react-toastify'
 
 export function Auth() {
   const [mode, setMode] = useState<"register" | "login">("register");
+  const [email,setEmail] = useState<string>()
+  const [password,setPassword] = useState<string>()
+
+  // console.log(email,password)
+  async function handleSubmit(e:React.FormEvent<HTMLFormElement>){
+    e.preventDefault()
+    if(mode == 'register' && email && password){
+      const {error} = await signup(email,password)
+      if(!error) {
+        toast('please login')
+        setMode('login')
+      }
+    }else{
+      return
+    }
+  }
+
+
   return (
     <div>
       <div className="flex justify-center mt-10">
@@ -26,13 +46,14 @@ export function Auth() {
       </div>
 
       <div>
-        <form action="" className="flex flex-col my-11">
+        <form onSubmit={handleSubmit} className="flex flex-col my-11">
           <label htmlFor="starting">Email</label>
           <input
             type="email"
             name="email"
             id="email"
             className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
+            onChange={(e)=>setEmail(e.target.value)}
           />
           <label htmlFor="starting">Password</label>
           <input
@@ -40,6 +61,7 @@ export function Auth() {
             name="password"
             id="password"
             className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
+            onChange={(e)=>setPassword(e.target.value)}
           />
           <input
             type="submit"
