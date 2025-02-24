@@ -1,26 +1,44 @@
 import { useState } from "react";
-import { signup } from "../utils/api";
-import {toast} from 'react-toastify'
+import { signup, login } from "../utils/api";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 export function Auth() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"register" | "login">("register");
-  const [email,setEmail] = useState<string>()
-  const [password,setPassword] = useState<string>()
+  const [email, setEmail] = useState<string>();
+  const [password, setPassword] = useState<string>();
+  const [errorMsg, setErrorMsg] = useState<string>();
+  const [isLoading,setIsLoading] = useState<boolean>(false)
 
   // console.log(email,password)
-  async function handleSubmit(e:React.FormEvent<HTMLFormElement>){
-    e.preventDefault()
-    if(mode == 'register' && email && password){
-      const {error} = await signup(email,password)
-      if(!error) {
-        toast('please login')
-        setMode('login')
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (email && password) {
+      setIsLoading(true)
+      if (mode == "register") {
+        const { error } = await signup(email, password);
+        if (!error) {
+          localStorage.removeItem("sb-idvofmywlvmgszbnjxcm-auth-token");
+          toast("please login");
+          setMode("login");
+        } else {
+          setErrorMsg(error.message);
+        }
+      } else {
+        const { error } = await login(email, password);
+        if (!error) {
+          toast("successfully logged in");
+          navigate("/");
+        } else {
+          setErrorMsg(error.message);
+        }
       }
-    }else{
-      return
+      setIsLoading(false)
+    } else {
+      return;
     }
   }
-
 
   return (
     <div>
@@ -30,7 +48,7 @@ export function Auth() {
             className={`px-4 py-2 rounded-full ${
               mode === "register" ? "bg-gray-50 dark:bg-gray-900" : ""
             }`}
-            onClick={()=>setMode("register")}
+            onClick={() => setMode("register")}
           >
             <span>Register</span>
           </div>
@@ -38,7 +56,7 @@ export function Auth() {
             className={`px-4 py-2 rounded-full ${
               mode === "login" ? "bg-gray-50 dark:bg-gray-900" : ""
             }`}
-            onClick={()=>setMode("login")}
+            onClick={() => setMode("login")}
           >
             <span>Login</span>
           </div>
@@ -53,7 +71,7 @@ export function Auth() {
             name="email"
             id="email"
             className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
-            onChange={(e)=>setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <label htmlFor="starting">Password</label>
           <input
@@ -61,12 +79,14 @@ export function Auth() {
             name="password"
             id="password"
             className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
-            onChange={(e)=>setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
+          {errorMsg && <span className="text-red-600">{errorMsg}</span>}
           <input
             type="submit"
-            value={mode=="login"?"Login":'Register'}
-            className="bg-gray-200 dark:bg-gray-600 my-6 py-2 rounded-full"
+            value={mode == "login" ? "Login" : "Register"}
+            className={`bg-gray-200 dark:bg-gray-600 my-6 py-2 rounded-full ${isLoading&&'opacity-50'}`}
+            disabled={isLoading}
           />
         </form>
       </div>
