@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import { FormEditData } from "../pages/Profile";
 
 const profileSchema = z.object({
   age: z.number(),
@@ -13,7 +14,7 @@ const profileSchema = z.object({
 
 export async function getRoutes() {
   const { data: route, error } = await supabase.from("route").select("*");
-  console.log(route);
+  // console.log(route);
   if (error) toast("error to get routes");
   return { route };
 }
@@ -57,4 +58,13 @@ export async function addProfile(user_id:string,name:string,gender:'male'|'femal
     .insert([{user_id,name,gender,age}])
     .select();
   return { data, error };
+}
+
+export async function updateProfile(profileData:FormEditData,user_id:string|number){
+  const { data, error } = await supabase
+  .from('profile')
+  .update(profileData)
+  .eq('user_id', user_id)
+  .select()
+  return { data, error } 
 }

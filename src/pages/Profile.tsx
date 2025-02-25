@@ -1,6 +1,6 @@
 import { ChangeEvent, useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { addProfile, logout } from "../utils/api";
+import { addProfile, logout, updateProfile } from "../utils/api";
 import {
   FaHeadset,
   FaInfoCircle,
@@ -11,10 +11,10 @@ import {
 import { getUserLocal } from "../utils/helperFn";
 import { useGetProfile } from "../hooks/QueryHooks";
 import { toast } from "react-toastify";
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from "@tanstack/react-query";
 // import { useGetProfile } from "../hooks/QueryHooks";
 
-type FormEditData = {
+export type FormEditData = {
   name: string;
   gender: string;
   age: number | string;
@@ -30,11 +30,9 @@ export function Profile() {
   });
   const navigate = useNavigate();
   const { data } = useGetProfile(userId || "");
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-
-
-  // console.log(data, error, userId);
+  // console.log(!data?.profile.success);
 
   async function handleLogout() {
     const { error } = await logout();
@@ -54,26 +52,20 @@ export function Profile() {
   }, [navigate, userId, data]);
 
   async function saveEditHandler() {
-
-    console.log("submit")
     if (!isEdit) {
       setIsEdit(true);
       return;
     }
     if (typeof userId == "undefined") return;
-    if (formEditData.gender == "male" || formEditData.gender == "female"){
-      
-      const {error} = await addProfile(
-        userId,
-        formEditData.name,
-        formEditData.gender,
-        Number(formEditData.age)
-      );
+    if (formEditData.gender == "male" || formEditData.gender == "female") {
+      const { error } = !data?.profile.success
+        ? await addProfile(userId,formEditData.name,formEditData.gender,Number(formEditData.age))
+        : await updateProfile(formEditData,userId);
       if (!error) {
-        queryClient.invalidateQueries({ queryKey: ['profile'] })
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
         setIsEdit(false);
       } else {
-        toast("Fail update profile");
+        toast("Fail add/update profile");
       }
     }
   }
@@ -163,10 +155,19 @@ export function Profile() {
             </form>
           </div>
         ) : (
-          <div className="my-3">
-            <div>Name:{data?.profile.data?.name}</div>
-            <div>Gender:{data?.profile.data?.gender}</div>
-            <div>Age:{data?.profile.data?.age}</div>
+          <div className="my-3 flex flex-col items-center">
+            {!data?.profile.success ? (
+              <span>Please Edit Profile</span>
+            ) : (
+              <>
+                <h1 className="text-xl font-light">
+                  {data?.profile.data?.name}
+                </h1>
+                <span>
+                  {data?.profile.data?.gender} | {data?.profile.data?.age}
+                </span>
+              </>
+            )}
           </div>
         )}
       </div>
