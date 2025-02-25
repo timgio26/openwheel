@@ -3,7 +3,8 @@ import { TbSteeringWheelFilled } from "react-icons/tb";
 import { useForm } from "react-hook-form";
 import { MyMap } from "../components/MyMap";
 import { IoIosArrowBack } from "react-icons/io";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { addRoute } from "../utils/api";
 // import { useRef } from "react";
 
 type PointData = {
@@ -24,7 +25,7 @@ export type MyRouteForm = {
 };
 
 export function MyRoute() {
-  // const navigate = useNavigate()
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -33,7 +34,7 @@ export function MyRoute() {
     formState: { errors },
   } = useForm<MyRouteForm>();
   const watchAllField = watch();
-  console.log(watchAllField);
+  // console.log(watchAllField);
   console.log(errors);
 
   function handleClick(value: "driver" | "passenger") {
@@ -73,17 +74,23 @@ export function MyRoute() {
 
   // function handleBack
 
-  function onSubmit(data: MyRouteForm) {
-    console.log(data);
+  async function onSubmit(data: MyRouteForm) {
+    if (!data.startingPoint || !data.destination || !data.day.length) {
+      console.log("no poin");
+      return;
+    }
+    const { error } = await addRoute(data);
+    if (!error) navigate("/myroute");
+    // console.log(error)
   }
 
   return (
     <div>
       <div className="flex flex-row justify-center items-center relative">
-        <Link className="absolute left-0" to={'/myroute'}>
-        <IoIosArrowBack  size={30}/>
+        <Link className="absolute left-0" to={"/myroute"}>
+          <IoIosArrowBack size={30} />
         </Link>
-        
+
         <h1 className="text-2xl font-light mb-2">Add Route</h1>
       </div>
       <MyMap
@@ -93,31 +100,8 @@ export function MyRoute() {
         lng2={watchAllField.destination?.lng}
         onMapClick={handleMapClick}
       />
+      {/* {errors.startingPoint?.type==""} */}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-        {/* <div className="flex flex-col my-1">
-          <label htmlFor="starting" onClick={() => console.log("wtf")}>
-            Starting point
-          </label>
-          <input
-            type="text"
-            // name="starting"
-            id="starting"
-            className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
-            {...register("startingPoint.strAddress", { required: true })}
-          />
-        </div>
-
-        <div className="flex flex-col my-1">
-          <label htmlFor="destination">Destination</label>
-          <input
-            type="text"
-            // name="destination"
-            id="destination"
-            className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
-            {...register("destination.strAddress", { required: true })}
-          />
-        </div> */}
-
         <div className="my-1">
           <span>Role</span>
           <div className="grid grid-cols-2 gap-4 text-gray-400">

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile, getRoutes } from "../utils/api";
+import { getProfile, getRoutes, getRoutesSingle } from "../utils/api";
 
 export function useGetRoutes(){
     const {data,error} = useQuery({
@@ -15,4 +15,12 @@ export function useGetProfile(id:string){
         queryKey:['profile']
     })
     return {data,error}
+}
+
+export function useGetRoute(id: string) {
+  const { data, error } = useQuery({
+    queryFn: () => getRoutesSingle(id),
+    queryKey: ["route"],
+  });
+  return { data, error };
 }

@@ -2,8 +2,11 @@ import { supabase } from "./supabase";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import { FormEditData } from "../pages/Profile";
+import { MyRouteForm } from "../pages/MyRoute";
+import { getUserLocal } from "./helperFn";
+// import { latLng } from "leaflet";
 
-const profileSchema = z.object({
+const ProfileSchema = z.object({
   age: z.number(),
   created_at: z.string(),
   gender: z.string(),
@@ -12,11 +15,55 @@ const profileSchema = z.object({
   user_id: z.string(),
 });
 
+const RouteSchema = z.object({
+  id:z.number(),
+  route_owner:z.string(),
+  origin:z.object({
+    lat:z.string(),
+    lng:z.string()
+  }),
+  destination:z.object({
+    lat:z.string(),
+    lng:z.string()
+  }),
+  role:z.string(),
+  avail_seat:z.number(),
+  fare:z.number(),
+  day:z.array(z.number()),
+  schedule:z.object({
+    arrival:z.string(),
+    depart:z.string()
+  })
+})
+
+export type Route = z.infer<typeof RouteSchema>;
+
+const RouteListSchema =z.array(RouteSchema)
+
+
+
 export async function getRoutes() {
   const { data: route, error } = await supabase.from("route").select("*");
   // console.log(route);
-  if (error) toast("error to get routes");
-  return { route };
+  const parseResult = RouteListSchema.safeParse(route)
+  // console.log(parseResult.success)
+  if (error || !parseResult.success) toast("error to get routes");
+  return { route:parseResult };
+}
+
+export async function getRoutesSingle(id:string) {
+  const { data: route, error } = await supabase.from("route").select("*").eq('id',id).limit(1).single()
+  console.log(route);
+  const parseResult = RouteSchema.safeParse(route)
+  // console.log(parseResult.success)
+  if (error || !parseResult.success) toast("error to get routes");
+  return { route:parseResult };
+}
+
+export async function deleteRouteSingle(id: number | string) {
+  const { error } = await supabase.from("route").delete().eq("id", Number(id));
+  if(error)toast("error delete route");
+  return {error}
 }
 
 export async function signup(email: string, password: string) {
@@ -48,7 +95,7 @@ export async function getProfile(userid: string) {
     .eq("user_id", userid)
     .limit(1)
     .single();
-  const parseResult = profileSchema.safeParse(profile);
+  const parseResult = ProfileSchema.safeParse(profile);
   return { profile: parseResult, error };
 }
 
@@ -67,4 +114,27 @@ export async function updateProfile(profileData:FormEditData,user_id:string|numb
   .eq('user_id', user_id)
   .select()
   return { data, error } 
+}
+
+export async function addRoute(formData: MyRouteForm) {
+  // const schJson = {depart:formData.timeDepart,arrival:formData.timeArrive}
+  const profileId = getUserLocal().userLocalId
+  if(!profileId)return { data:null, error:'no id' }
+  console.log(profileId)
+  const { data, error } = await supabase
+    .from("route")
+    .insert([
+      {
+        route_owner: profileId,
+        origin: formData.destination,
+        destination: formData.startingPoint,
+        role: formData.role,
+        avail_seat: formData.availSeat,
+        fare:Number(formData.fare),
+        day:formData.day,
+        schedule:{depart:formData.timeDepart,arrival:formData.timeArrive}
+      },
+    ])
+    .select();
+  return { data, error };
 }

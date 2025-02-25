@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
-import { Home, Profile, FindWheel, MyRoute, Auth,MyRouteList} from "./pages/index.ts";
+import { Home, Profile, FindWheel, MyRoute, Auth,MyRouteList,MyRouteDetails} from "./pages/index.ts";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
 
@@ -16,6 +16,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/myroute">
               <Route index element={<MyRouteList/>} />
               <Route path="add" element={<MyRoute/>} />
+              <Route path=":id" element={<MyRouteDetails/>} />
             </Route>
             <Route path="/findwheel" element={<FindWheel />} />
             <Route path="/profile" element={<Profile />} />

@@ -43,6 +43,7 @@ export function Profile() {
     if (!userId) {
       navigate("/auth");
     }
+    if(data?.profile.data?.id) localStorage.setItem("profileId",data.profile.data.id.toString())
     setFormEditData((state) => ({
       ...state,
       name: data?.profile.data?.name || "",
