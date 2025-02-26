@@ -1,32 +1,105 @@
-import { useNavigate, useParams } from "react-router"
-import { useGetRoute } from "../hooks/QueryHooks"
-import { deleteRouteSingle } from "../utils/api"
+import { useNavigate, useParams } from "react-router";
+import { useGetRoute } from "../hooks/QueryHooks";
+import { deleteRouteSingle } from "../utils/api";
+import { MyMapStatic } from "../components/MyMapStatic";
+import { MdOutlineAirlineSeatReclineNormal } from "react-icons/md";
+import { TbSteeringWheelFilled } from "react-icons/tb";
 
-export function MyRouteDetails(){
-    const {id} = useParams()
-    const navigate = useNavigate()
-    const {data,error}= useGetRoute(id||'')
-    console.log(data,error)
+export function MyRouteDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { data, error } = useGetRoute(id || "");
+  //   console.log(data, error);
 
-    async function handleDelete(){
-        if(!id)return
-        const {error} = await deleteRouteSingle(id)
-        if(!error)navigate('/myroute')
-    }
+  async function handleDelete() {
+    if (!id) return;
+    const { error } = await deleteRouteSingle(id);
+    if (!error) navigate("/myroute");
+  }
 
-    return(
-        <div>
-            <h1 className="text-2xl text-center font-light mb-2">Route Details</h1>
-            <div className="flex flex-col">
+  if (!data || error)
+    return (
+      <>
+        <span>No data, please try again</span>
+      </>
+    );
+  return (
+    <div>
+      <h1 className="text-2xl text-center font-light mb-2">Route Details</h1>
+      {/* <div className="flex flex-col"> */}
+      <MyMapStatic
+        lat1={data.route.data?.origin.lat}
+        lng1={data.route.data?.origin.lng}
+        lat2={data.route.data?.destination.lat}
+        lng2={data.route.data?.destination.lng}
+      />
 
-            <span>{data?.route.data?.origin.lat},{data?.route.data?.origin.lng}</span>
-            <span>{data?.route.data?.destination.lat},{data?.route.data?.destination.lng}</span>
-            <span>{data?.route.data?.role}</span>
-            </div>
-
-            <div className="bg-red-400 dark:bg-red-900 text-center py-1 my-3 rounded shadow-xl" onClick={handleDelete}>
-                delete route
-            </div>
+      <div className="my-4 gap-1 flex flex-col items-center">
+        <span>Role</span>
+        <div className="flex flex-col items-center bg-gray-200 dark:bg-gray-900 p-3 rounded-2xl">
+          {data.route.data?.role == "passenger" && (
+            <MdOutlineAirlineSeatReclineNormal size={40} />
+          )}
+          {data.route.data?.role == "driver" && (
+            <TbSteeringWheelFilled size={40} />
+          )}
+          <span>{data.route.data?.role}</span>
         </div>
-    )
+        <span>
+            Seat available: {data.route.data?.avail_seat}
+        </span>
+        <span>
+            Fare: {data.route.data?.fare} USD
+        </span>
+      </div>
+      {/* </div> */}
+      <div className="my-4 gap-1 flex flex-col">
+        <div className="flex justify-center">
+          <span>Schedule</span>
+        </div>
+        <div className="grid grid-cols-7 gap-1 text-gray-400">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+            (each, index) => (
+              <div
+                className={`bg-gray-100 dark:bg-gray-900 p-2 flex flex-col items-center rounded-md opacity-50 ${
+                  data.route.data?.day.includes(index) &&
+                  "text-black dark:text-white font-bold opacity-100"
+                }`}
+                key={each}
+                // onClick={() => handleDay(index)}
+              >
+                {each}
+              </div>
+            )
+          )}
+        </div>
+        <div className="flex flex-row justify-center gap-5">
+          <div className="font-bold text-2xl">
+            {data.route.data?.schedule.depart}
+          </div>
+          <div className="font-bold text-2xl">-</div>
+          <div className="font-bold text-2xl">
+            {data.route.data?.schedule.arrival}
+          </div>
+        </div>
+      </div>
+      <div className="mt-10 border-t">
+        {data.route.data?.role == "passenger" && (
+          <div
+            className="bg-gray-400 dark:bg-gray-900 text-center py-1 my-3 rounded shadow-xl"
+            // onClick={Fi}
+          >
+            find driver
+          </div>
+        )}
+
+        <div
+          className="bg-red-400 dark:bg-red-900 text-center py-1 my-3 rounded shadow-xl"
+          onClick={handleDelete}
+        >
+          delete route
+        </div>
+      </div>
+    </div>
+  );
 }

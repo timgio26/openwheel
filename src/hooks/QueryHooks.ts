@@ -3,7 +3,7 @@ import { getProfile, getRoutes, getRoutesSingle } from "../utils/api";
 
 export function useGetRoutes(){
     const {data,error} = useQuery({
-        queryFn:getRoutes,
+        queryFn:()=>getRoutes(),
         queryKey:['routes']
     })
     return {data,error}

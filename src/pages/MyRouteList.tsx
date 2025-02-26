@@ -5,6 +5,7 @@ import { RouteTile } from "../components/RouteTile";
 // import { MyRouteForm } from "../pages/MyRoute";
 // import { getRoutes } from "../utils/api";
 import { useGetRoutes } from "../hooks/QueryHooks";
+import { useState } from "react";
 
 
 
@@ -103,6 +104,7 @@ import { useGetRoutes } from "../hooks/QueryHooks";
 
 export function MyRouteList() {
   const {data,error} = useGetRoutes()
+  const [mode,setMode] = useState<'driver'|'passenger'>('driver')
   // console.log(data)
   if(error)return(
     <div>
@@ -115,11 +117,18 @@ export function MyRouteList() {
       <div>
         <h1 className="text-2xl text-center font-light mb-2">All Route</h1>
       </div>
+      <div className="flex flex-row gap-2 border-b">
+        <div className={mode=='driver'?"border-b-4":""} onClick={()=>setMode('driver')}><span>Driver</span></div>
+        <div className={mode=='passenger'?"border-b-4":""} onClick={()=>setMode('passenger')}><span>Passenger</span></div>
+      </div>
+
+      {data?.route && 
       <div>
-        {data?.route.data?.map((route, index) => (
+        {data.route.data?.filter((route)=>route.role==mode).map((route, index) => (
           <RouteTile key={index} route={route} />
         ))}
       </div>
+      }
       <div className="h-22 w-22 rounded-full bg-gray-300 dark:bg-gray-700 bottom-20 fixed right-5 flex justify-center align-middle items-center shadow-md">
         <Link to={"add"}>
           <div className="flex flex-col justify-center align-middle items-center">

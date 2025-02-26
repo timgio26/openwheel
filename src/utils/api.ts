@@ -18,6 +18,7 @@ const ProfileSchema = z.object({
 const RouteSchema = z.object({
   id:z.number(),
   route_owner:z.string(),
+  route_name:z.string(),
   origin:z.object({
     lat:z.string(),
     lng:z.string()
@@ -43,17 +44,19 @@ const RouteListSchema =z.array(RouteSchema)
 
 
 export async function getRoutes() {
-  const { data: route, error } = await supabase.from("route").select("*");
-  // console.log(route);
+  const profileId = getUserLocal().userLocalId
+  if(!profileId)return { route:null, error:'no id' }
+  const { data: route, error } = await supabase.from("route").select("*").eq('route_owner',profileId);
+  console.log(route);
   const parseResult = RouteListSchema.safeParse(route)
-  // console.log(parseResult.success)
+  console.log(parseResult.success)
   if (error || !parseResult.success) toast("error to get routes");
   return { route:parseResult };
 }
 
 export async function getRoutesSingle(id:string) {
   const { data: route, error } = await supabase.from("route").select("*").eq('id',id).limit(1).single()
-  console.log(route);
+  // console.log(route);
   const parseResult = RouteSchema.safeParse(route)
   // console.log(parseResult.success)
   if (error || !parseResult.success) toast("error to get routes");
@@ -125,9 +128,10 @@ export async function addRoute(formData: MyRouteForm) {
     .from("route")
     .insert([
       {
+        route_name:formData.routeName,
         route_owner: profileId,
-        origin: formData.destination,
-        destination: formData.startingPoint,
+        origin: formData.startingPoint,
+        destination: formData.destination,
         role: formData.role,
         avail_seat: formData.availSeat,
         fare:Number(formData.fare),

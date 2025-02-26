@@ -14,6 +14,7 @@ type PointData = {
 };
 
 export type MyRouteForm = {
+  routeName:string;
   startingPoint: PointData;
   destination: PointData;
   role: "driver" | "passenger";
@@ -31,11 +32,11 @@ export function MyRoute() {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    // formState: { errors },
   } = useForm<MyRouteForm>();
   const watchAllField = watch();
   // console.log(watchAllField);
-  console.log(errors);
+  // console.log(errors);
 
   function handleClick(value: "driver" | "passenger") {
     setValue("role", value);
@@ -47,6 +48,7 @@ export function MyRoute() {
     lat: string,
     lng: string
   ): void {
+    console.log(lat,lng)
     if (point == "destination") {
       setValue("destination.lat", lat);
       setValue("destination.lng", lng);
@@ -103,6 +105,20 @@ export function MyRoute() {
       {/* {errors.startingPoint?.type==""} */}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
         <div className="my-1">
+
+          <div className="flex flex-col my-1">
+
+        <label htmlFor="routename">Route Name</label>
+          <input
+            type="text"
+            id="routeName"
+            className="border-b h-10 border-gray-200 focus:ring-0 focus:outline-none"
+            {...register("routeName", {
+              required: true,
+            })}
+            />
+            </div>
+
           <span>Role</span>
           <div className="grid grid-cols-2 gap-4 text-gray-400">
             <div
