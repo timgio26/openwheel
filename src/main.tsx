@@ -2,7 +2,17 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
-import { Home, Profile, FindWheel, MyRoute, Auth,MyRouteList,MyRouteDetails} from "./pages/index.ts";
+import {
+  Home,
+  Profile,
+  FindWheel,
+  MyRoute,
+  Auth,
+  MyRouteList,
+  MyRouteDetails,
+  FindDriver,
+  ProtectedPage
+} from "./pages/index.ts";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
 
@@ -14,11 +24,14 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/" element={<App />}>
             <Route index element={<Home />} />
             <Route path="/myroute">
-              <Route index element={<MyRouteList/>} />
-              <Route path="add" element={<MyRoute/>} />
-              <Route path=":id" element={<MyRouteDetails/>} />
+              <Route index element={<ProtectedPage><MyRouteList /></ProtectedPage>} />
+              <Route path="add" element={<ProtectedPage><MyRoute /></ProtectedPage>} />
+              <Route path=":id">
+                <Route index element={<ProtectedPage><MyRouteDetails /></ProtectedPage>}/>
+                <Route path="finddriver" element={<ProtectedPage><FindDriver /></ProtectedPage>}/>
+              </Route>
             </Route>
-            <Route path="/findwheel" element={<FindWheel />} />
+            <Route path="/findwheel" element={<ProtectedPage><FindWheel /></ProtectedPage>} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/auth" element={<Auth />} />
           </Route>

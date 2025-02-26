@@ -15,7 +15,7 @@ const ProfileSchema = z.object({
   user_id: z.string(),
 });
 
-const RouteSchema = z.object({
+export const RouteSchema = z.object({
   id:z.number(),
   route_owner:z.string(),
   route_name:z.string(),

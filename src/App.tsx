@@ -1,8 +1,5 @@
-// import './App.css'
 import { Outlet, NavLink } from "react-router";
-// import { CiDark,CiLight } from "react-icons/ci";
-// import {  } from "react-router";
-import { FaRoute, FaHome, FaCarSide, FaUser } from "react-icons/fa";
+import { FaRoute, FaHome, FaUser ,FaRegCalendar } from "react-icons/fa";
 import { useTheme, Theme } from "./components/ThemeProvider";
 import { ToastContainer } from "react-toastify";
 import { QueryClient,QueryClientProvider} from "@tanstack/react-query";
@@ -72,8 +69,8 @@ function App() {
             }
             to={"/findwheel"}
           >
-            <FaCarSide />
-            <h1 className="text-xs">find wheel</h1>
+            <FaRegCalendar />
+            <h1 className="text-xs">schedule</h1>
           </NavLink>
           <NavLink
             className={({ isActive }) =>

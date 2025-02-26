@@ -1,9 +1,10 @@
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams,Link} from "react-router";
 import { useGetRoute } from "../hooks/QueryHooks";
 import { deleteRouteSingle } from "../utils/api";
 import { MyMapStatic } from "../components/MyMapStatic";
 import { MdOutlineAirlineSeatReclineNormal } from "react-icons/md";
 import { TbSteeringWheelFilled } from "react-icons/tb";
+import { IoIosArrowBack } from "react-icons/io";
 
 export function MyRouteDetails() {
   const { id } = useParams();
@@ -17,6 +18,10 @@ export function MyRouteDetails() {
     if (!error) navigate("/myroute");
   }
 
+  function handleFindDriver(){
+    navigate('finddriver',{state:data})
+  }
+
   if (!data || error)
     return (
       <>
@@ -25,7 +30,14 @@ export function MyRouteDetails() {
     );
   return (
     <div>
-      <h1 className="text-2xl text-center font-light mb-2">Route Details</h1>
+      <div className="flex flex-row justify-center items-center relative">
+        <Link className="absolute left-0" to={"/myroute"}>
+          <IoIosArrowBack size={30} />
+        </Link>
+
+        <h1 className="text-2xl font-light mb-2">Route Details</h1>
+      </div>
+      {/* <h1 className="text-2xl text-center font-light mb-2">Route Details</h1> */}
       {/* <div className="flex flex-col"> */}
       <MyMapStatic
         lat1={data.route.data?.origin.lat}
@@ -45,12 +57,12 @@ export function MyRouteDetails() {
           )}
           <span>{data.route.data?.role}</span>
         </div>
-        <span>
-            Seat available: {data.route.data?.avail_seat}
-        </span>
-        <span>
-            Fare: {data.route.data?.fare} USD
-        </span>
+
+        {data.route.data?.role =="driver"&&<>
+        
+        <span>Seat available: {data.route.data?.avail_seat}</span>
+        <span>Fare: {data.route.data?.fare} USD</span>
+        </>}
       </div>
       {/* </div> */}
       <div className="my-4 gap-1 flex flex-col">
@@ -87,7 +99,7 @@ export function MyRouteDetails() {
         {data.route.data?.role == "passenger" && (
           <div
             className="bg-gray-400 dark:bg-gray-900 text-center py-1 my-3 rounded shadow-xl"
-            // onClick={Fi}
+            onClick={handleFindDriver}
           >
             find driver
           </div>
