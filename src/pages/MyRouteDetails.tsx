@@ -28,6 +28,8 @@ export function MyRouteDetails() {
         <span>No data, please try again</span>
       </>
     );
+
+  const {route} = data
   return (
     <div>
       <div className="flex flex-row justify-center items-center relative">
@@ -40,10 +42,10 @@ export function MyRouteDetails() {
       {/* <h1 className="text-2xl text-center font-light mb-2">Route Details</h1> */}
       {/* <div className="flex flex-col"> */}
       <MyMapStatic
-        lat1={data.route.data?.origin.lat}
-        lng1={data.route.data?.origin.lng}
-        lat2={data.route.data?.destination.lat}
-        lng2={data.route.data?.destination.lng}
+        lat1={route.data?.origin_lat}
+        lng1={route.data?.origin_lng}
+        lat2={route.data?.destination_lat}
+        lng2={route.data?.destination_lng}
       />
 
       <div className="my-4 gap-1 flex flex-col items-center">

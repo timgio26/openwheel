@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 
 export function Auth() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"register" | "login">("register");
+  const [mode, setMode] = useState<"register" | "login">("login");
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
   const [errorMsg, setErrorMsg] = useState<string>();
