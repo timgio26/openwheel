@@ -33,11 +33,36 @@ export const RouteSchema = z.object({
   }),
 });
 
+export const RouteOwnerDetailSchema = z.object({
+  id: z.number(),
+  route_owner: z.object({
+    age:z.number(),
+    gender:z.string(),
+    name:z.string()
+  }),
+  route_name: z.string(),
+  origin_lat: z.number(),
+  origin_lng: z.number(),
+  destination_lat: z.number(),
+  destination_lng: z.number(),
+  role: z.string(),
+  avail_seat: z.number(),
+  fare: z.number(),
+  day: z.array(z.number()),
+  schedule: z.object({
+    arrival: z.string(),
+    depart: z.string(),
+  }),
+});
+
 export type Route = z.infer<typeof RouteSchema>;
+export type RouteOwnerDetail = z.infer<typeof RouteOwnerDetailSchema>;
 
 const RouteListSchema = z.array(RouteSchema);
+const RouteOwnerDetailListSchema = z.array(RouteOwnerDetailSchema);
 
 export type RouteList = z.infer<typeof RouteListSchema>;
+export type RouteOwnerDetailList = z.infer<typeof RouteOwnerDetailListSchema>;
 
 export async function getRoutes() {
   const profileId = getUserLocal().userLocalId;
@@ -62,12 +87,20 @@ export async function getDriver(
   lng2: number
 ) {
   const profileId = getUserLocal().userLocalId;
-  const dist = distance(lat1, lng1, lat2, lng2) * 0.01;
-  console.log("origin_lat", lat1 - 0.01, dist);
+  const dist = distance(lat1, lng1, lat2, lng2) * 0.01 * 0.5;
+  // console.log("origin_lat", lat1 - 0.01, dist);
+  console.log(
+    `find driver with origin lat between ${lat1 - dist} -  ${lat1 + dist} 
+    and lng between ${lng1 - dist} -  ${lng1 + dist}`
+  );
+  console.log(
+    `destination lat between ${lat2 - dist} -  ${lat2 + dist} 
+    and lng between ${lng2 - dist} -  ${lng2 + dist}`
+  );
   if (!profileId) return { route: null, error: "no id" };
   const { data: route, error } = await supabase
     .from("route")
-    .select("*")
+    .select("*,route_owner(age,gender,name)")
     .eq("role", "driver")
     .gte("origin_lat", lat1 - dist)
     .gte("origin_lng", lng1 - dist)
@@ -79,9 +112,9 @@ export async function getDriver(
     .lte("destination_lng", lng2 + dist)
     .contains("day", [day])
     .neq("route_owner", profileId);
-  // console.log(route);
-  const parseResult = RouteListSchema.safeParse(route);
-  // console.log(parseResult.success);
+  console.log(route);
+  const parseResult = RouteOwnerDetailListSchema.safeParse(route);
+  console.log(parseResult.success);
   if (error || !parseResult.success) toast("error to get routes");
   return { route: parseResult };
 }

@@ -11,7 +11,8 @@ import {
   MyRouteList,
   MyRouteDetails,
   FindDriver,
-  ProtectedPage
+  ProtectedPage,
+  FindDriverDetails
 } from "./pages/index.ts";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
@@ -29,6 +30,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path=":id">
                 <Route index element={<ProtectedPage><MyRouteDetails /></ProtectedPage>}/>
                 <Route path="finddriver" element={<ProtectedPage><FindDriver /></ProtectedPage>}/>
+                <Route path="finddriver/:id" element={<ProtectedPage><FindDriverDetails /></ProtectedPage>}/> 
               </Route>
             </Route>
             <Route path="/findwheel" element={<ProtectedPage><FindWheel /></ProtectedPage>} />

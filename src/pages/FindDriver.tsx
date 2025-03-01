@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from "react-router";
 import { IoIosArrowBack } from "react-icons/io";
 import { z } from "zod";
-import { getDriver, RouteSchema,RouteList} from "../utils/api";
+import { getDriver, RouteSchema,RouteOwnerDetailList, RouteOwnerDetail} from "../utils/api";
 import { useState } from "react";
-import { MyMapDriverPassenger } from "../components/MyMapDriverPassenger";
+// import { MyMapDriverPassenger } from "../components/MyMapDriverPassenger";
+import { RouteOptionTile } from "../components/RouteOptionTile";
 // import { useEffect, useLayoutEffect } from "react";
 
 const StateSchema = z.object({
@@ -17,7 +18,7 @@ export function FindDriver() {
   const { state } = useLocation();
   const parseResult = StateSchema.safeParse(state);
   const [selectedDay,setSelectedDay] = useState<number>()
-  const [allDriverRoute,setAllDriverRoute] = useState<RouteList>()
+  const [allDriverRoute,setAllDriverRoute] = useState<RouteOwnerDetailList>()
 
 
   const {data:parsedata}= parseResult
@@ -43,6 +44,10 @@ export function FindDriver() {
     // console.log(route)
   }
 
+  function goToDriverRouteDetail(routeid:number,driverRoute:RouteOwnerDetail){
+    navigate(`${routeid}`,{state:{data,driverRoute}})
+  }
+
   return (
     <div>
       <div className="flex flex-row justify-center items-center relative">
@@ -62,7 +67,7 @@ export function FindDriver() {
           <div>{data.schedule.arrival}</div>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-gray-400">
+      <div className="grid grid-cols-7 gap-1 text-gray-400 my-2">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
           (each, index) => (
             <div
@@ -82,19 +87,9 @@ export function FindDriver() {
         )}
       </div>
       <span>
-        {selectedDay}
 
         {allDriverRoute?.map((each) => (
-          <MyMapDriverPassenger
-            latd1={each.origin_lat}
-            lngd1={each.origin_lng}
-            latd2={each.destination_lat}
-            lngd2={each.destination_lng}
-            latp1={data.origin_lat}
-            lngp1={data.origin_lng}
-            latp2={data.destination_lat}
-            lngp2={data.destination_lng}
-          />
+          <RouteOptionTile key={each.id} route={each} onClickDetails={()=>goToDriverRouteDetail(each.id,each)}/>
         ))}
       </span>
     </div>
