@@ -3,9 +3,10 @@ import { IoIosArrowBack } from "react-icons/io";
 import { z } from "zod";
 import { getDriver, RouteSchema,RouteOwnerDetailList, RouteOwnerDetail} from "../utils/api";
 import { useState } from "react";
-// import { MyMapDriverPassenger } from "../components/MyMapDriverPassenger";
 import { RouteOptionTile } from "../components/RouteOptionTile";
-// import { useEffect, useLayoutEffect } from "react";
+
+import {useDispatch} from 'react-redux'
+import { setday } from '../features/carPoolSlices'
 
 const StateSchema = z.object({
   route: z.object({
@@ -14,11 +15,16 @@ const StateSchema = z.object({
 });
 
 export function FindDriver() {
+  // const selectedDayRdx = useSelector((state: RootState) => state.day.day)
   const navigate = useNavigate();
   const { state } = useLocation();
   const parseResult = StateSchema.safeParse(state);
   const [selectedDay,setSelectedDay] = useState<number>()
   const [allDriverRoute,setAllDriverRoute] = useState<RouteOwnerDetailList>()
+
+  const dispatch=useDispatch()
+
+
 
 
   const {data:parsedata}= parseResult
@@ -38,6 +44,7 @@ export function FindDriver() {
   async function handleSelectDay(daynum:number){
     if(!data.day.includes(daynum))return
     setSelectedDay(daynum)
+    dispatch(setday(daynum))
     const {route} = await getDriver(Number(daynum),data.origin_lat,data.origin_lng,data.destination_lat,data.destination_lng)
     if(!route?.data)return
     setAllDriverRoute(route.data)
@@ -49,7 +56,7 @@ export function FindDriver() {
   }
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <div className="flex flex-row justify-center items-center relative">
         <div className="absolute left-0" onClick={handleBack}>
           <IoIosArrowBack size={30} />
@@ -86,12 +93,19 @@ export function FindDriver() {
           )
         )}
       </div>
-      <span>
-
-        {allDriverRoute?.map((each) => (
-          <RouteOptionTile key={each.id} route={each} onClickDetails={()=>goToDriverRouteDetail(each.id,each)}/>
-        ))}
-      </span>
+      <div className="h-full">
+        {!allDriverRoute ? (
+          <div className="text-center my-7">Please select a day</div>
+        ) : (
+          allDriverRoute?.map((each) => (
+            <RouteOptionTile
+              key={each.id}
+              route={each}
+              onClickDetails={() => goToDriverRouteDetail(each.id, each)}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }

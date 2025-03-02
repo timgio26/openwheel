@@ -7,8 +7,6 @@ import { RouteTile } from "../components/RouteTile";
 import { useGetRoutes } from "../hooks/QueryHooks";
 import { useState } from "react";
 
-
-
 // const routes: MyRouteForm[] = [
 //   {
 //     startingPoint: {

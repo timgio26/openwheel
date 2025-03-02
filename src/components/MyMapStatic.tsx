@@ -10,16 +10,17 @@ type MapProp = {
   lng1: string | number | undefined;
   lat2: string | number | undefined;
   lng2: string | number | undefined;
+  zoom:number
 };
 
-export function MyMapStatic({ lat1, lng1, lat2, lng2 }: MapProp) {
+export function MyMapStatic({ lat1, lng1, lat2, lng2,zoom}: MapProp) {
   return (
     <div className="h-70 w-auto mt-4 mb-4 relative flex justify-center">
 
       <MapContainer
         className="h-full w-full z-0"
         center={[(Number(lat1)+Number(lat2))/2, (Number(lng1)+Number(lng2))/2]}
-        zoom={10}
+        zoom={zoom}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         

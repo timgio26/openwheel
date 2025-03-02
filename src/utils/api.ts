@@ -55,6 +55,14 @@ export const RouteOwnerDetailSchema = z.object({
   }),
 });
 
+const carPoolSchema = z.object({
+  id:z.number(),
+  day:z.number(),
+  passenger_route_id:z.number(),
+  route_id:z.number(),
+  created_at:z.string()
+})
+
 export type Route = z.infer<typeof RouteSchema>;
 export type RouteOwnerDetail = z.infer<typeof RouteOwnerDetailSchema>;
 
@@ -223,4 +231,41 @@ export async function addRoute(formData: MyRouteForm) {
     ])
     .select();
   return { data, error };
+}
+
+export async function addCarPool(route_id:number, day:number, passenger_route_id:number){
+  const { data, error } = await supabase
+  .from('route_member')
+  .insert([
+    { route_id, day,passenger_route_id },
+  ])
+  .select().limit(1).single()
+  const parseResult = carPoolSchema.safeParse(data)
+  // if(parseResult.data)
+  if(!parseResult.success) toast("error to request carpooling");
+  return {data:parseResult.data,error}
+}
+
+export async function getCarPoolReqCount(passengerRouteId:number){
+  console.log(passengerRouteId)
+  const { count, error } = await supabase
+    .from("route_member")
+    .select("*" , { count: "exact", head: true })//, { count: "exact", head: true }
+    // .eq('route_id',driverRouteId)
+    .eq("passenger_route_id", passengerRouteId)
+    .neq("status", "cancel");
+    console.log(count)
+  return {count,error}
+}
+
+export async function getPassengerReq(driverRouteId:number){
+  // console.log(passengerRouteId)
+  const { data, error } = await supabase
+    .from("route_member")
+    .select("*")//, { count: "exact", head: true }
+    // .eq('route_id',driverRouteId)
+    .eq("route_id", driverRouteId)
+    .neq("status", "cancel");
+    // console.log(count)
+  return {data,error}
 }

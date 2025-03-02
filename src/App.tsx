@@ -3,6 +3,8 @@ import { FaRoute, FaHome, FaUser ,FaRegCalendar } from "react-icons/fa";
 import { useTheme, Theme } from "./components/ThemeProvider";
 import { ToastContainer } from "react-toastify";
 import { QueryClient,QueryClientProvider} from "@tanstack/react-query";
+import { store } from '../store'
+import { Provider } from 'react-redux'
 
 const queryClient = new QueryClient();
 
@@ -18,6 +20,7 @@ function App() {
   }
 
   return (
+    <Provider store={store}>
     <QueryClientProvider client={queryClient}>
       <div className="flex flex-col justify-between h-svh dark:bg-gray-950 dark:text-gray-200">
         <div className=" px-3 py-4 flex flex-row justify-between items-center">
@@ -87,6 +90,7 @@ function App() {
         <ToastContainer />
       </div>
     </QueryClientProvider>
+    </Provider>
   );
 }
 
