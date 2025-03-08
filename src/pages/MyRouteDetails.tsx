@@ -1,18 +1,23 @@
 import { useNavigate, useParams, Link } from "react-router";
 import { useGetRoute } from "../hooks/QueryHooks";
-import { deleteRouteSingle, getCarPoolReqCount } from "../utils/api";
+import { deleteRouteSingle, getCarPoolReqCount, getPassengerReq, PassengerReqList } from "../utils/api";
 import { MyMapStatic } from "../components/MyMapStatic";
 import { MdOutlineAirlineSeatReclineNormal } from "react-icons/md";
 import { TbSteeringWheelFilled } from "react-icons/tb";
 import { IoIosArrowBack } from "react-icons/io";
 import { distance } from "../utils/helperFn";
-import { useEffect,  } from "react";
+import { useEffect, useState,  } from "react";
+import { toast } from "react-toastify";
 
 export function MyRouteDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, error } = useGetRoute(id || "");
+  const [selectedDay,setSelectedDay] = useState<number>()
+  const [dataPassenger,setDataPassenger] = useState<PassengerReqList>()
   // const [activeBooking,setActiveBooking] = useState<boolean>(false)
+
+  // console.log(dataPassenger)
 
   async function handleDelete() {
     if (!id) return;
@@ -28,10 +33,25 @@ export function MyRouteDetails() {
     navigate("passengerrequest");
   }
 
+  async function handleSelectDay(day:number){
+    if(!data?.route.data?.day.includes(day) || !id )return
+    setSelectedDay(day)
+    const {data:dataPassenger,error} = await getPassengerReq(Number(id),day)
+    // console.log(dataPassenger,error)
+    if(!dataPassenger) return
+    const filteredDataPassenger = dataPassenger.filter((each)=>each.status=='accept')
+    if(error){
+      toast.error("error getting passenger list")
+      return
+    }
+    setDataPassenger(filteredDataPassenger)
+  }
+  
+  // console.log(selectedDay)
   useEffect(()=>{
     async function getCarPoolReqCountFn(){
       if(!id)return
-      console.log(id)
+      // console.log(id)
       const {count:carPoolReqCount,error} = await getCarPoolReqCount(Number(id))
       // if(carPoolReqCount)setActiveBooking(true)
       console.log(carPoolReqCount,error)
@@ -75,23 +95,24 @@ export function MyRouteDetails() {
           lng1={route.data.origin_lng}
           lat2={route.data.destination_lat}
           lng2={route.data.destination_lng}
-          zoom={(dist*-0.6 )+ 15.2}
+          zoom={dist * -0.6 + 15.2}
         />
-        <div className="text-center font-mono text-2xl">{data.route.data?.route_name}</div>
+        <div className="text-center font-mono text-2xl">
+          {data.route.data?.route_name}
+        </div>
 
         <div className="my-4 gap-1 flex flex-row items-center justify-around">
           <div className="flex flex-col items-center">
-
-          {/* <span>Role</span> */}
-          <div className="flex flex-col items-center bg-gray-200 dark:bg-gray-900 p-3 rounded-2xl">
-            {data.route.data?.role == "passenger" && (
-              <MdOutlineAirlineSeatReclineNormal size={40} />
-            )}
-            {data.route.data?.role == "driver" && (
-              <TbSteeringWheelFilled size={40} />
-            )}
-            <span>{data.route.data?.role}</span>
-          </div>
+            {/* <span>Role</span> */}
+            <div className="flex flex-col items-center bg-gray-200 dark:bg-gray-900 p-3 rounded-2xl">
+              {data.route.data?.role == "passenger" && (
+                <MdOutlineAirlineSeatReclineNormal size={40} />
+              )}
+              {data.route.data?.role == "driver" && (
+                <TbSteeringWheelFilled size={40} />
+              )}
+              <span>{data.route.data?.role}</span>
+            </div>
           </div>
 
           {data.route.data?.role == "driver" && (
@@ -113,9 +134,14 @@ export function MyRouteDetails() {
                   className={`bg-gray-100 dark:bg-gray-900 p-2 flex flex-col items-center rounded-md opacity-50 ${
                     data.route.data?.day.includes(index) &&
                     "text-black dark:text-white font-bold opacity-100"
-                  }`}
+                  }
+                  ${
+                    selectedDay == index &&
+                    "border-2 border-orange-500 opacity-100"
+                  }
+                  `}
                   key={each}
-                  // onClick={() => handleDay(index)}
+                  onClick={() => handleSelectDay(index)}
                 >
                   {each}
                 </div>
@@ -132,10 +158,23 @@ export function MyRouteDetails() {
             </div>
           </div>
         </div>
+
+        {dataPassenger && dataPassenger.length>0 && (
+          <div>
+            {/* <span>{dataPassenger}</span> */}
+            <span>passenger :</span>
+            <ul className="list-disc list-inside">
+              {dataPassenger.map((each) => (
+                <li key={each.id}>
+                  {each.passenger_route_id.route_owner.name}
+                </li>
+              ))}
+            </ul>
+
+            {/* </ul> */}
+          </div>
+        )}
       </div>
-
-
-
 
       <div className="border-t">
         {data.route.data?.role == "passenger" && (
@@ -147,7 +186,7 @@ export function MyRouteDetails() {
           </div>
         )}
 
-      {data.route.data?.role == "driver" && (
+        {data.route.data?.role == "driver" && (
           <div
             className="bg-gray-300 dark:bg-gray-900 text-center py-1 my-3 rounded shadow-xl"
             onClick={handlePassengerRequest}
