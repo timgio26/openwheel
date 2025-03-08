@@ -63,6 +63,39 @@ const carPoolSchema = z.object({
   created_at:z.string()
 })
 
+export const passengerReqSchema = z.object({
+  created_at:z.string(),
+  day:z.number(),
+  id:z.number(),
+  passenger_route_id:z.object({
+    origin_lat: z.number(),
+    origin_lng: z.number(),
+    destination_lat: z.number(),
+    destination_lng: z.number(),
+    route_owner: z.object({
+      age:z.number(),
+      gender:z.string(),
+      name:z.string()
+    }),
+  }),
+  route_id:z.object({
+    origin_lat: z.number(),
+    origin_lng: z.number(),
+    destination_lat: z.number(),
+    destination_lng: z.number(),
+    // route_owner: z.object({
+    //   age:z.number(),
+    //   gender:z.string(),
+    //   name:z.string()
+    // }),
+  }),
+  status:z.string()
+}) 
+
+const passengerReqListSchema = z.array(passengerReqSchema)
+export type PassengerReq = z.infer<typeof passengerReqSchema>;
+export type PassengerReqList = z.infer<typeof passengerReqListSchema>;
+
 export type Route = z.infer<typeof RouteSchema>;
 export type RouteOwnerDetail = z.infer<typeof RouteOwnerDetailSchema>;
 
@@ -258,14 +291,27 @@ export async function getCarPoolReqCount(passengerRouteId:number){
   return {count,error}
 }
 
-export async function getPassengerReq(driverRouteId:number){
+export async function getPassengerReq(driverRouteId:number,day:number){
   // console.log(passengerRouteId)
   const { data, error } = await supabase
     .from("route_member")
-    .select("*")//, { count: "exact", head: true }
-    // .eq('route_id',driverRouteId)
+    .select("*,route_id(*),passenger_route_id(*,route_owner(*))")//, { count: "exact", head: true }
+    .eq('day',day)
     .eq("route_id", driverRouteId)
     .neq("status", "cancel");
-    // console.log(count)
-  return {data,error}
+    // console.log(day)
+    
+  // console.log(data)
+  const parseResult = passengerReqListSchema.safeParse(data)
+  // console.log(parseResult)
+  return {data:parseResult.data,error}
+}
+
+export async function accRejRequest(id: number, status: string) {
+  const { data, error } = await supabase
+    .from("route_member")
+    .update({ status })
+    .eq("id", id)
+    .select();
+  return { data, error };
 }

@@ -6,6 +6,7 @@ export {MyRouteDetails} from './MyRouteDetails'
 export {FindDriver} from './FindDriver' 
 export {FindDriverDetails} from './FindDriverDetails'
 export {PassengerRequest} from './PassengerRequest'
+export {PassengerRequestDetails} from './PassengerRequestDetails'
 
 export {FindWheel  } from "./FindWheel";
 

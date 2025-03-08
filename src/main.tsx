@@ -14,7 +14,8 @@ import {
   ProtectedPage,
   FindDriverDetails,
   Confirm,
-  PassengerRequest
+  PassengerRequest,
+  PassengerRequestDetails
 } from "./pages/index.ts";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
@@ -37,6 +38,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="passengerrequest" element={<ProtectedPage><PassengerRequest /></ProtectedPage>}/> 
               </Route>
             </Route>
+            <Route path="/request_details" element={<ProtectedPage><PassengerRequestDetails /></ProtectedPage>} />
             <Route path="/findwheel" element={<ProtectedPage><FindWheel /></ProtectedPage>} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/auth" element={<Auth />} />

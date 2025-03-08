@@ -77,9 +77,12 @@ export function MyRouteDetails() {
           lng2={route.data.destination_lng}
           zoom={(dist*-0.6 )+ 15.2}
         />
+        <div className="text-center font-mono text-2xl">{data.route.data?.route_name}</div>
 
-        <div className="my-4 gap-1 flex flex-col items-center">
-          <span>Role</span>
+        <div className="my-4 gap-1 flex flex-row items-center justify-around">
+          <div className="flex flex-col items-center">
+
+          {/* <span>Role</span> */}
           <div className="flex flex-col items-center bg-gray-200 dark:bg-gray-900 p-3 rounded-2xl">
             {data.route.data?.role == "passenger" && (
               <MdOutlineAirlineSeatReclineNormal size={40} />
@@ -89,12 +92,13 @@ export function MyRouteDetails() {
             )}
             <span>{data.route.data?.role}</span>
           </div>
+          </div>
 
           {data.route.data?.role == "driver" && (
-            <>
+            <div className="flex flex-col">
               <span>Seat available: {data.route.data?.avail_seat}</span>
               <span>Fare: {data.route.data?.fare} USD</span>
-            </>
+            </div>
           )}
         </div>
         {/* </div> */}
