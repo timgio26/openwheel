@@ -1,4 +1,4 @@
-import { useNavigate, useParams, Link } from "react-router";
+import { useNavigate, useParams, Link, useLocation } from "react-router";
 import { useGetRoute } from "../hooks/QueryHooks";
 import { deleteRouteSingle, getCarPoolReqCount, getPassengerReq, PassengerReqList } from "../utils/api";
 import { MyMapStatic } from "../components/MyMapStatic";
@@ -9,15 +9,25 @@ import { distance } from "../utils/helperFn";
 import { useEffect, useState,  } from "react";
 import { toast } from "react-toastify";
 
+import { z } from "zod";
+
+const stateSchema = z.object({
+  day:z.number()
+});
+
+
 export function MyRouteDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, error } = useGetRoute(id || "");
   const [selectedDay,setSelectedDay] = useState<number>()
   const [dataPassenger,setDataPassenger] = useState<PassengerReqList>()
+  const {state} = useLocation()
+
+  const parseResult = stateSchema.safeParse(state)
   // const [activeBooking,setActiveBooking] = useState<boolean>(false)
 
-  // console.log(dataPassenger)
+
 
   async function handleDelete() {
     if (!id) return;
@@ -33,28 +43,34 @@ export function MyRouteDetails() {
     navigate("passengerrequest");
   }
 
-  async function handleSelectDay(day:number){
-    if(!data?.route.data?.day.includes(day) || !id )return
-    setSelectedDay(day)
-    const {data:dataPassenger,error} = await getPassengerReq(Number(id),day)
-    // console.log(dataPassenger,error)
-    if(!dataPassenger) return
-    const filteredDataPassenger = dataPassenger.filter((each)=>each.status=='accept')
-    if(error){
-      toast.error("error getting passenger list")
-      return
+    async function handleSelectDay(day: number) {
+      if (!data?.route.data?.day.includes(day) || !id) return;
+      setSelectedDay(day);
+      const { data: dataPassenger, error } = await getPassengerReq(
+        Number(id),
+        day
+      );
+      // console.log(dataPassenger,error)
+      if (!dataPassenger) return;
+      const filteredDataPassenger = dataPassenger.filter(
+        (each) => each.status == "accept"
+      );
+      if (error) {
+        toast.error("error getting passenger list");
+        return;
+      }
+      setDataPassenger(filteredDataPassenger);
     }
-    setDataPassenger(filteredDataPassenger)
-  }
   
-  // console.log(selectedDay)
+
   useEffect(()=>{
     async function getCarPoolReqCountFn(){
       if(!id)return
-      // console.log(id)
       const {count:carPoolReqCount,error} = await getCarPoolReqCount(Number(id))
-      // if(carPoolReqCount)setActiveBooking(true)
       console.log(carPoolReqCount,error)
+    }
+    if(parseResult.success){
+      handleSelectDay(parseResult.data.day)
     }
     getCarPoolReqCountFn()
   },[id])
@@ -101,28 +117,30 @@ export function MyRouteDetails() {
           {data.route.data?.route_name}
         </div>
 
-        <div className="my-4 gap-1 flex flex-row items-center justify-around">
-          <div className="flex flex-col items-center">
-            {/* <span>Role</span> */}
-            <div className="flex flex-col items-center bg-gray-200 dark:bg-gray-900 p-3 rounded-2xl">
-              {data.route.data?.role == "passenger" && (
-                <MdOutlineAirlineSeatReclineNormal size={40} />
-              )}
-              {data.route.data?.role == "driver" && (
-                <TbSteeringWheelFilled size={40} />
-              )}
-              <span>{data.route.data?.role}</span>
+        {!parseResult.success && (
+          <div className="my-4 gap-1 flex flex-row items-center justify-around">
+            <div className="flex flex-col items-center">
+              {/* <span>Role</span> */}
+              <div className="flex flex-col items-center bg-gray-200 dark:bg-gray-900 p-3 rounded-2xl">
+                {data.route.data?.role == "passenger" && (
+                  <MdOutlineAirlineSeatReclineNormal size={40} />
+                )}
+                {data.route.data?.role == "driver" && (
+                  <TbSteeringWheelFilled size={40} />
+                )}
+                <span>{data.route.data?.role}</span>
+              </div>
             </div>
-          </div>
 
-          {data.route.data?.role == "driver" && (
-            <div className="flex flex-col">
-              <span>Seat available: {data.route.data?.avail_seat}</span>
-              <span>Fare: {data.route.data?.fare} USD</span>
-            </div>
-          )}
-        </div>
-        {/* </div> */}
+            {data.route.data?.role == "driver" && (
+              <div className="flex flex-col">
+                <span>Seat available: {data.route.data?.avail_seat}</span>
+                <span>Fare: {data.route.data?.fare} USD</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="my-4 gap-1 flex flex-col">
           <div className="flex justify-center">
             <span>Schedule</span>
@@ -159,7 +177,7 @@ export function MyRouteDetails() {
           </div>
         </div>
 
-        {dataPassenger && dataPassenger.length>0 && (
+        {dataPassenger && dataPassenger.length > 0 && (
           <div>
             {/* <span>{dataPassenger}</span> */}
             <span>passenger :</span>
@@ -176,32 +194,34 @@ export function MyRouteDetails() {
         )}
       </div>
 
-      <div className="border-t">
-        {data.route.data?.role == "passenger" && (
-          <div
-            className="bg-gray-300 dark:bg-gray-900 text-center py-1 my-3 rounded shadow-xl"
-            onClick={handleFindDriver}
-          >
-            find driver
-          </div>
-        )}
+      {!parseResult.success && (
+        <div className="border-t">
+          {data.route.data?.role == "passenger" && (
+            <div
+              className="bg-gray-300 dark:bg-gray-900 text-center py-1 my-3 rounded shadow-xl"
+              onClick={handleFindDriver}
+            >
+              find driver
+            </div>
+          )}
 
-        {data.route.data?.role == "driver" && (
-          <div
-            className="bg-gray-300 dark:bg-gray-900 text-center py-1 my-3 rounded shadow-xl"
-            onClick={handlePassengerRequest}
-          >
-            passenger request
-          </div>
-        )}
+          {data.route.data?.role == "driver" && (
+            <div
+              className="bg-gray-300 dark:bg-gray-900 text-center py-1 my-3 rounded shadow-xl"
+              onClick={handlePassengerRequest}
+            >
+              passenger request
+            </div>
+          )}
 
-        <div
-          className="bg-red-400 dark:bg-red-900 text-center py-1 my-3 rounded shadow-xl"
-          onClick={handleDelete}
-        >
-          delete route
+          <div
+            className="bg-red-400 dark:bg-red-900 text-center py-1 my-3 rounded shadow-xl"
+            onClick={handleDelete}
+          >
+            delete route
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

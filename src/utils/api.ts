@@ -36,6 +36,7 @@ export const RouteSchema = z.object({
 export const RouteOwnerDetailSchema = z.object({
   id: z.number(),
   route_owner: z.object({
+    // id:z.string(),
     age:z.number(),
     gender:z.string(),
     name:z.string()
@@ -75,10 +76,12 @@ export const passengerReqSchema = z.object({
     route_owner: z.object({
       age:z.number(),
       gender:z.string(),
-      name:z.string()
+      name:z.string(),
+      user_id:z.string(),
     }),
   }),
   route_id:z.object({
+    id:z.number(),
     origin_lat: z.number(),
     origin_lng: z.number(),
     destination_lat: z.number(),
@@ -304,6 +307,21 @@ export async function getPassengerReq(driverRouteId:number,day:number){
   // console.log(data)
   const parseResult = passengerReqListSchema.safeParse(data)
   // console.log(parseResult)
+  return {data:parseResult.data,error}
+}
+
+export async function getDailyPassengerReq(day:number){
+  console.log(getUserLocal().userLocalId)
+  const { data, error } = await supabase
+    .from("route_member")
+    .select("*,route_id!inner(*),passenger_route_id(*,route_owner(*))")//, { count: "exact", head: true }
+    .eq('day',day)
+    .eq("route_id.route_owner", getUserLocal().userLocalId)
+    .neq("status", "cancel");
+
+  // console.log(data)
+  const parseResult = passengerReqListSchema.safeParse(data)
+
   return {data:parseResult.data,error}
 }
 

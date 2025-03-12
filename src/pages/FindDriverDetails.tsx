@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router";
 import { IoIosArrowBack } from "react-icons/io";
-import { RouteSchema,RouteOwnerDetailSchema, addCarPool } from "../utils/api";
+import { RouteSchema,RouteOwnerDetailSchema, addCarPool, getPassengerReq } from "../utils/api";
 import { z } from "zod";
 import { MyMapDriverPassenger } from "../components/MyMapDriverPassenger";
 
@@ -9,6 +9,8 @@ import type { RootState } from '../../store'
 import { useSelector, 
   // useDispatch 
 } from 'react-redux'
+import { useEffect, useState } from "react";
+import { getUserLocal } from "../utils/helperFn";
 // import { setday } from '../features/carPoolSlices'
 
 const DriverPassengerSchema = z.object({
@@ -25,8 +27,9 @@ export function FindDriverDetails() {
 
   const selectedDay = useSelector((state: RootState) => state.day.day)
   // const dispatch = useDispatch()
+  const [filledSeat,setFilledSeat] = useState<number>()
 
-
+  // console.log(data)
   function handleBack() {
     navigate(-1);
   }
@@ -40,6 +43,23 @@ export function FindDriverDetails() {
     console.log(addCarPoolData,error)
     if(!error)navigate('confirm')
   }
+
+
+  useEffect(()=>{
+    async function getPsg(){
+      if(!data || selectedDay == undefined)return
+      console.log(data.data.id,selectedDay)
+      const {data:psgData,error} = await getPassengerReq(data.driverRoute.id,selectedDay)
+      console.log(psgData,error)
+      if(!psgData)return
+      const id = getUserLocal().userLocalId
+      const ln = psgData.filter((each)=>each.status!=='cancel').length
+      console.log(psgData.filter((each)=>each.passenger_route_id.route_owner.user_id==id))
+      setFilledSeat(ln)
+      // console.log(psgData,error)
+    }
+    getPsg()
+  },[data,selectedDay])
 
   if (!data) return <h1>No data. try again later</h1>;
   
@@ -76,7 +96,7 @@ export function FindDriverDetails() {
             <span className="text-2xl font-bold">
               {data.driverRoute.fare} USD / trip
             </span>
-            <span className="text-right">x seat available</span>
+            <span className="text-right">{data.driverRoute.avail_seat - Number(filledSeat)} seat available</span>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { getRoutes, RouteList } from "../utils/api"
+import { getDailyPassengerReq, getRoutes, PassengerReqList, RouteList } from "../utils/api"
 // import { RouteTile } from "../components/RouteTile"
 import { RouteTileSimple } from "../components/RouteTileSimple"
 
@@ -9,16 +9,20 @@ export function FindWheel(){
     // console.log(dayIdx)
 
     const [myRoutesToday,setMyRoutesToday] = useState<RouteList>()
+    const [myRoutesMember,setMyRoutesMember] = useState<PassengerReqList>()
     // console.log(myRoutesToday)
 
     useEffect(()=>{
         async function getMyRoutes(){
             const {route} = await getRoutes()
-            if(!route) return
+            const {data:routeMember,error} = await getDailyPassengerReq(dayIdx)
+            // console.log(routeMember,error)
+            if(!route || error) return
             const {data} = route
             if(!data) return
             const dataForToday = data.filter((each)=>each.day.includes(dayIdx)).sort()
             setMyRoutesToday(dataForToday)
+            setMyRoutesMember(routeMember)
         }
         getMyRoutes()
     },[dayIdx])
@@ -30,11 +34,15 @@ export function FindWheel(){
             <h1 className="font-light">{day.toDateString().slice(4).toUpperCase()}</h1>
             </div>
             {myRoutesToday&&
-            myRoutesToday.map((each)=>
+            myRoutesToday.map((each)=>{
+                const passenger = myRoutesMember?.filter((eachm)=>eachm.route_id.id==each.id)
+                return(
+                    <RouteTileSimple route={each} key={each.id} member={passenger} day={dayIdx}/>
+                )
+            }
                 // <div>
                 //     {each.route_name}
                 // </div>
-                <RouteTileSimple route={each} key={each.id}/>
             )}
         </div>
     )
