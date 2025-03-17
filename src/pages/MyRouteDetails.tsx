@@ -1,15 +1,26 @@
+import { useEffect, useState,  } from "react";
 import { useNavigate, useParams, Link, useLocation } from "react-router";
 import { useGetRoute } from "../hooks/QueryHooks";
-import { deleteRouteSingle, getCarPoolReqCount, getPassengerReq, PassengerReqList } from "../utils/api";
+import { z } from "zod";
+
+import { distance } from "../utils/helperFn";
+import {
+  deleteRouteSingle,
+  // getCarPoolReqCount,
+  getPassengerReq,
+  PassengerReqList,
+} from "../utils/api";
 import { MyMapStatic } from "../components/MyMapStatic";
+
 import { MdOutlineAirlineSeatReclineNormal } from "react-icons/md";
 import { TbSteeringWheelFilled } from "react-icons/tb";
 import { IoIosArrowBack } from "react-icons/io";
-import { distance } from "../utils/helperFn";
-import { useEffect, useState,  } from "react";
 import { toast } from "react-toastify";
 
-import { z } from "zod";
+import { useDispatch } from 'react-redux'
+import {setCurLat,setCurLng} from '../features/myRouteSlices'
+// import type { RootState } from '../../store'
+
 
 const stateSchema = z.object({
   day:z.number()
@@ -23,11 +34,10 @@ export function MyRouteDetails() {
   const [selectedDay,setSelectedDay] = useState<number>()
   const [dataPassenger,setDataPassenger] = useState<PassengerReqList>()
   const {state} = useLocation()
+  const dispatch = useDispatch()
 
+  // console.log(data)
   const parseResult = stateSchema.safeParse(state)
-  // const [activeBooking,setActiveBooking] = useState<boolean>(false)
-
-
 
   async function handleDelete() {
     if (!id) return;
@@ -65,15 +75,18 @@ export function MyRouteDetails() {
 
   useEffect(()=>{
     async function getCarPoolReqCountFn(){
-      if(!id)return
-      const {count:carPoolReqCount,error} = await getCarPoolReqCount(Number(id))
-      console.log(carPoolReqCount,error)
+      // if(!id)return
+      // const {count:carPoolReqCount,error} = await getCarPoolReqCount(Number(id))
+
+      dispatch(setCurLat(Number(data?.route.data?.origin_lat)))
+      dispatch(setCurLng(Number(data?.route.data?.origin_lng)))
     }
-    if(parseResult.success){
-      handleSelectDay(parseResult.data.day)
-    }
+    // if(parseResult.success){
+    //   handleSelectDay(parseResult.data.day)
+    // }
+    
     getCarPoolReqCountFn()
-  },[id])
+  },[data,dispatch])
 
   
 

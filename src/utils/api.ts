@@ -95,6 +95,23 @@ export const passengerReqSchema = z.object({
   status:z.string()
 }) 
 
+
+export const myDriverSchema = z.object({
+  created_at: z.string(),
+  day: z.number(),
+  id: z.number(),
+  passenger_route_id: z.number(),
+  route_id: z.object({
+    id: z.number(),
+    route_owner: z.object({
+      age: z.number(),
+      gender: z.string(),
+      name: z.string(),
+    }),
+  }),
+  status: z.string(),
+}); 
+
 const passengerReqListSchema = z.array(passengerReqSchema)
 export type PassengerReq = z.infer<typeof passengerReqSchema>;
 export type PassengerReqList = z.infer<typeof passengerReqListSchema>;
@@ -332,4 +349,18 @@ export async function accRejRequest(id: number, status: string) {
     .eq("id", id)
     .select();
   return { data, error };
+}
+
+
+export async function getMyDriver(id:number,day:number){
+  const { data, error } = await supabase
+    .from("route_member")
+    .select('*,route_id(*,route_owner(*))')
+    .eq("passenger_route_id", id)
+    .eq('day',day)
+    .limit(1)
+    .single()
+    // console.log(data)
+    const parseResult = myDriverSchema.safeParse(data)
+  return { data:parseResult, error };
 }

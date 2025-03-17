@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router";
-import { PassengerReqList, Route } from "../utils/api";
+import { getMyDriver, PassengerReqList, Route } from "../utils/api";
+import { useEffect, useState } from "react";
+// import { useLayersControl } from "react-leaflet/LayersControl";
 
 type RouteTileProp = {
   route: Route;
@@ -9,12 +11,23 @@ type RouteTileProp = {
 
 export function RouteTileSimple({ route, member,day}: RouteTileProp) {
   const navigate = useNavigate()
-  // console.log(member)
+  const [driver,setDriver] = useState<string>()
 
   function handleTileClick(){
-    console.log('click')
+    // console.log('click')
     navigate(`/myroute/${route.id}`,{state:{day}})
   }
+
+  useEffect(()=>{
+    async function getDriver(){
+      // console.log(route.id,day)
+      if(route.role !== 'passenger')return
+      const {data} = await getMyDriver(route.id,day)
+      if(!data.success)return
+      setDriver(data.data.route_id.route_owner.name)
+    }
+    getDriver()
+  },[route,day])
 
   return (
     <div
@@ -70,7 +83,7 @@ export function RouteTileSimple({ route, member,day}: RouteTileProp) {
             </ul>
           </div>
         ) : (
-          <span>driver name</span>
+          <span>driver name: {driver}</span>
         )}
       </div>
     </div>

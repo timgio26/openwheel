@@ -6,7 +6,7 @@ import { IoIosArrowBack } from "react-icons/io";
 export function PassengerRequestDetails() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  console.log(state);
+  // console.log(state);
   const parseResult = passengerReqSchema.safeParse(state);
   const { data } = parseResult;
 

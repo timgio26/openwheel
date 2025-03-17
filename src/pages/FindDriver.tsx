@@ -1,12 +1,14 @@
+import { useState} from "react";
 import { useLocation, useNavigate } from "react-router";
-import { IoIosArrowBack } from "react-icons/io";
 import { z } from "zod";
 import { getDriver, RouteSchema,RouteOwnerDetailList, RouteOwnerDetail} from "../utils/api";
-import { useState } from "react";
+
 import { RouteOptionTile } from "../components/RouteOptionTile";
+import { IoIosArrowBack } from "react-icons/io";
 
 import {useDispatch} from 'react-redux'
 import { setday } from '../features/carPoolSlices'
+// import type { RootState } from '../../store'
 
 const StateSchema = z.object({
   route: z.object({
@@ -23,6 +25,17 @@ export function FindDriver() {
   const [allDriverRoute,setAllDriverRoute] = useState<RouteOwnerDetailList>()
 
   const dispatch=useDispatch()
+  // const curlat = useSelector((state: RootState) => state.route.curLat)
+  // const curlng = useSelector((state: RootState) => state.route.curLng)
+
+  // console.log(curlat,curlng)
+
+  // useEffect(()=>{
+  //   // console.log(curlat)
+  //   if(!curlat || !curlng) navigate(-1)
+  // },[curlat,curlng,navigate])
+
+  
 
 
 

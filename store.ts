@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import dayReducers from './src/features/carPoolSlices'
+import routeReducers from './src/features/myRouteSlices'
 
 export const store = configureStore({
   reducer: {
     day: dayReducers,
+    route:routeReducers
     // comments: commentsReducer,
     // users: usersReducer
   }
